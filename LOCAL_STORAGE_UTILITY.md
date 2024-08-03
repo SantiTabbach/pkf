@@ -1,7 +1,6 @@
 ```typescript
 export enum LS_KEYS {
-	THEME = 'theme',
-	LOCALE = 'locale',
+	EXAMPLE = 'example',
 }
 
 /**
@@ -125,12 +124,8 @@ export const createRemoveData = (
 	};
 };
 
-// Specific functions for theme and locale
-export const persistThemeOnStorage = createPersistData(LS_KEYS.THEME);
-export const removeThemeFromStorage = createRemoveData(LS_KEYS.THEME);
-export const retrieveThemeFromStorage = createRetrieveData(LS_KEYS.THEME);
-
-export const persistLocaleOnStorage = createPersistData(LS_KEYS.LOCALE);
-export const removeLocaleFromStorage = createRemoveData(LS_KEYS.LOCALE);
-export const retrieveLocaleFromStorage = createRetrieveData(LS_KEYS.LOCALE);
+// USAGE EXAMPLE
+export const persistExampleOnStorage = createPersistData(LS_KEYS.EXAMPLE);
+export const removeExampleFromStorage = createRemoveData(LS_KEYS.EXAMPLE);
+export const retrieveExampleFromStorage = createRetrieveData(LS_KEYS.EXAMPLE);
 ```
