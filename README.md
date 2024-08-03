@@ -10,7 +10,7 @@
 
 ### Typescript utilities
 
-- [LocalStorage factory utility](./utilities/LOCAL_STORAGE_UTILITY.md)
+- [LocalStorage utility](./utilities/LOCAL_STORAGE_UTILITY.md)
 
 ### React
 

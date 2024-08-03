@@ -41,7 +41,7 @@ const logSuccess = (key: string, action: string) => {
  * @returns The retrieved value or null if not found.
  */
 const retrieveData = (key: string): string | null => {
-	return localStorage.getItem(key);
+	return localStorage.getItem(key) || null;
 };
 
 /**
@@ -148,11 +148,11 @@ const user = {
 	},
 };
 
-persistUserOnStorage(user);
+persistUserOnStorage(JSON.stringify(user));
 
 // Retrieve the user from localStorage
 const retrievedUser = retrieveUserFromStorage();
-console.log('Retrieved user:', retrievedUser);
+console.log('Retrieved user:', JSON.parse(retrievedUser ?? {}));
 
 // Remove the user from localStorage
 removeUserFromStorage();
