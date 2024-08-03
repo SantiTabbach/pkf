@@ -4,8 +4,8 @@ export enum LS_KEYS {
 }
 
 /**
- * Handles errors by logging them and optionally raising an exception.
- * @param key - The localStorage key.
+ * Handles errors encountered during localStorage operations.
+ * @param key - The key for the localStorage item.
  * @param error - The error encountered.
  * @param raiseException - Whether to throw an exception.
  * @param action - The action being performed (retrieving, setting, removing).
@@ -27,8 +27,8 @@ const handleError = (
 };
 
 /**
- * Logs a successful action to the console.
- * @param key - The localStorage key.
+ * Logs a success message for localStorage operations.
+ * @param key - The key for the localStorage item.
  * @param action - The action performed (retrieved, written, removed).
  */
 const logSuccess = (key: string, action: string) => {
@@ -37,8 +37,8 @@ const logSuccess = (key: string, action: string) => {
 
 /**
  * Retrieves data from localStorage.
- * @param key - The localStorage key.
- * @returns The retrieved value or null if the key doesn't exist.
+ * @param key - The key for the localStorage item.
+ * @returns The retrieved value or null if not found.
  */
 const retrieveData = (key: string): string | null => {
 	return localStorage.getItem(key);
@@ -46,7 +46,7 @@ const retrieveData = (key: string): string | null => {
 
 /**
  * Persists data to localStorage.
- * @param key - The localStorage key.
+ * @param key - The key for the localStorage item.
  * @param value - The value to store.
  */
 const persistData = (key: string, value: string): void => {
@@ -55,7 +55,7 @@ const persistData = (key: string, value: string): void => {
 
 /**
  * Removes data from localStorage.
- * @param key - The localStorage key.
+ * @param key - The key for the localStorage item.
  */
 const removeData = (key: string): void => {
 	localStorage.removeItem(key);
@@ -63,7 +63,7 @@ const removeData = (key: string): void => {
 
 /**
  * Removes multiple data items from localStorage.
- * @param keys - The array of localStorage keys to remove.
+ * @param keys - The keys for the localStorage items to remove.
  */
 const removeMultipleData = (keys: string[]): void => {
 	keys.forEach((key) => localStorage.removeItem(key));
@@ -71,16 +71,16 @@ const removeMultipleData = (keys: string[]): void => {
 
 /**
  * Creates a function to retrieve data from localStorage.
- * @param key - The localStorage key.
+ * @param key - The key for the localStorage item.
  * @param raiseException - Whether to throw an exception on error.
- * @returns A function to retrieve the data.
+ * @returns A function that retrieves the data.
  */
 export const createRetrieveData = (key: LS_KEYS, raiseException = false) => {
 	return () => {
 		try {
 			const value = retrieveData(key);
 			logSuccess(key, 'retrieved');
-			return value ? JSON.parse(value) : null;
+			return value;
 		} catch (error) {
 			handleError(key, error, raiseException, 'retrieving');
 		}
@@ -89,14 +89,14 @@ export const createRetrieveData = (key: LS_KEYS, raiseException = false) => {
 
 /**
  * Creates a function to persist data to localStorage.
- * @param key - The localStorage key.
+ * @param key - The key for the localStorage item.
  * @param raiseException - Whether to throw an exception on error.
- * @returns A function to persist the data.
+ * @returns A function that persists the data.
  */
 export const createPersistData = (key: LS_KEYS, raiseException = false) => {
-	return (value: unknown) => {
+	return (value: string) => {
 		try {
-			persistData(key, JSON.stringify(value));
+			persistData(key, value);
 			logSuccess(key, 'written');
 		} catch (error) {
 			handleError(key, error, raiseException, 'setting');
@@ -106,9 +106,9 @@ export const createPersistData = (key: LS_KEYS, raiseException = false) => {
 
 /**
  * Creates a function to remove data from localStorage.
- * @param keys - The localStorage key or keys to remove.
+ * @param keys - The key(s) for the localStorage items to remove.
  * @param raiseException - Whether to throw an exception on error.
- * @returns A function to remove the data.
+ * @returns A function that removes the data.
  */
 export const createRemoveData = (
 	keys: LS_KEYS | LS_KEYS[],
