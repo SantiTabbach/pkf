@@ -2,7 +2,7 @@
 
 ![pill-time](./assets/pill-time.gif)
 
-## Pills jar
+## Pill jars
 
 ### Deploy
 
