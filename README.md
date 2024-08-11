@@ -16,3 +16,4 @@
 ### React
 
 - [Handle API feedback with a HOC](./react/API_FEEDBACK_HOC.md)
+- [Reusable list with custom render item component](./react/REUSABLE_LIST.md)
