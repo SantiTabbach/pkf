@@ -15,7 +15,6 @@ interface UseMutationHandlerOptions<ResponseType> {
 	onSuccess?: (response: ResponseType) => void;
 	onError?: (error: unknown) => void;
 	onFinally?: (args?: unknown) => void;
-	omitAlert?: boolean;
 	showLoader?: boolean;
 }
 
@@ -35,7 +34,7 @@ const useMutationHandler = <
 
 	const wrappedMutation = useCallback(
 		async (requestData: QueryArgFrom<MutationDefinition<U, V, X, W>>) => {
-			showLoader && dispatch(setLoading({ isLoading: true })); // Spinner component handled by Redux, check -> https://medium.com/@ymmhydfct/streamlining-loading-state-management-with-redux-in-react-applications-d75765f9b224
+			showLoader && dispatch(setLoading({ isLoading: true })); // Spinner component handled by Redux, check -> https://medium.com/@santitabbach/streamlining-loading-state-management-with-redux-in-react-applications-d75765f9b224
 			try {
 				const response = await mutate(requestData).unwrap();
 				// Perform your success enchantments here 🪄
