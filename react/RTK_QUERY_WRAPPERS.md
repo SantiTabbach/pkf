@@ -102,7 +102,6 @@ import {
 import { UseQuery } from '@reduxjs/toolkit/dist/query/react/buildHooks';
 import { useSetLoading } from 'src/redux/features/application/loading';
 import { RequestError } from '../types';
-import { REQUEST_ACTION } from '../enums';
 
 interface UseQueryHandlerOptions<ResponseType> {
 	onSuccess?: (response: ResponseType) => void;
@@ -195,9 +194,7 @@ export default useQueryHandler;
 
 ```typescript
 import { useGetActiveNeighborhoodsQuery } from 'src/redux/features/alertifyCoreApi/map/apiMapSlice';
-import { REQUEST_ACTION, useQueryHandler } from 'src/services';
-
-const { FETCH_ACTIVE_NEIGHBORHOODS } = REQUEST_ACTION;
+import { useQueryHandler } from 'src/services';
 
 const useGetActiveNeighborhoods = () => {
 	const { data: activeNeighborhoods = [] } = useQueryHandler({
