@@ -13,7 +13,7 @@ import { setLoading } from 'src/redux/features/application/loading';
 
 interface UseMutationHandlerOptions<ResponseType> {
 	onSuccess?: (response: ResponseType) => void;
-	onError?: (error: unknown) => void;
+	onError?: (error: RequestError) => void;
 	onFinally?: (args?: unknown) => void;
 	showLoader?: boolean;
 }
@@ -118,7 +118,7 @@ interface UseQueryHandlerParams<
 > {
 	query: UseQuery<QueryDefinition<U, V, X, W>>;
 	options: UseQueryHandlerOptions<W>;
-	queryArgs?: QueryArgFrom<QueryDefinition<U, V, X, W>>;
+	queryArgs: QueryArgFrom<QueryDefinition<U, V, X, W>>;
 	extraOptions?: QueryDefinition<U, V, X, W>['extraOptions'];
 }
 
@@ -130,7 +130,7 @@ const useQueryHandler = <
 >({
 	query,
 	options,
-	queryArgs,
+	queryArgs = {} as QueryArgFrom<QueryDefinition<U, V, X, W>>,
 	extraOptions,
 }: UseQueryHandlerParams<U, V, W, X>) => {
 	const { onSuccess, onError, onFinally, showLoader = true } = options;
@@ -143,7 +143,7 @@ const useQueryHandler = <
 		isLoading,
 		isFetching,
 		...queryResult
-	} = query(queryArgs!, extraOptions);
+	} = query(queryArgs, extraOptions);
 
 	useSetLoading(showLoader && (isFetching || isLoading)); // Spinner component handled by Redux, check -> https://medium.com/@santitabbach/streamlining-loading-state-management-with-redux-in-react-applications-d75765f9b224
 
