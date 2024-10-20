@@ -1,22 +1,50 @@
 ## Mutation wrapper
 
+### Hook types
+
 ```typescript
-import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import {
 	BaseQueryFn,
 	MutationDefinition,
 	QueryArgFrom,
 } from '@reduxjs/toolkit/query';
 import { UseMutation } from '@reduxjs/toolkit/dist/query/react/buildHooks';
-import { setLoading } from 'src/redux/features/application/loading';
+import { RequestError } from 'src/services/types';
 
-interface UseMutationHandlerOptions<ResponseType> {
-	onSuccess?: (response: ResponseType) => void;
-	onError?: (error: RequestError) => void;
-	onFinally?: (args?: unknown) => void;
+export interface UseMutationHandlerOptions<ResponseType> {
+	onSuccess?: (response: ResponseType) => Promise<void> | void;
+	onError?: (error: RequestError) => Promise<void> | void;
+	onFinally?: (args?: unknown) => Promise<void> | void;
 	showLoader?: boolean;
 }
+
+export type MutationHandler<
+	U,
+	V extends BaseQueryFn,
+	W,
+	X extends string = string
+> = UseMutation<MutationDefinition<U, V, X, W>>;
+
+export type QueryArg<
+	U,
+	V extends BaseQueryFn,
+	X extends string,
+	W
+> = QueryArgFrom<MutationDefinition<U, V, X, W>>;
+```
+
+### Hook
+
+```typescript
+import { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { BaseQueryFn } from '@reduxjs/toolkit/query';
+import { setLoading } from 'src/redux/features/application/loading';
+import {
+	MutationHandler,
+	QueryArg,
+	UseMutationHandlerOptions,
+} from './useMutationHandler.d.ts';
 
 const useMutationHandler = <
 	U,
@@ -24,34 +52,34 @@ const useMutationHandler = <
 	W,
 	X extends string = string
 >(
-	mutation: UseMutation<MutationDefinition<U, V, X, W>>,
+	mutation: MutationHandler<U, V, W, X>,
 	options: UseMutationHandlerOptions<W>
 ) => {
-	const [mutate, status] = mutation();
-
 	const { onSuccess, onError, onFinally, showLoader = true } = options;
+
+	const [mutate, status] = mutation();
 	const dispatch = useDispatch();
 
 	const wrappedMutation = useCallback(
-		async (requestData: QueryArgFrom<MutationDefinition<U, V, X, W>>) => {
+		async (requestData: QueryArg<U, V, X, W>) => {
 			showLoader && dispatch(setLoading({ isLoading: true })); // Spinner component handled by Redux, check -> https://medium.com/@santitabbach/streamlining-loading-state-management-with-redux-in-react-applications-d75765f9b224
 			try {
 				const response = await mutate(requestData).unwrap();
 				// Perform your success enchantments here 🪄
 				if (onSuccess) {
-					return onSuccess(response);
+					return await onSuccess(response);
 				}
 
 				return response;
 			} catch (error) {
 				// Perform your error enchantments here 🪄
 				if (onError) {
-					return onError(error);
+					return await onError(error);
 				}
 			} finally {
 				// Perform your final enchantments here 🪄
 				if (onFinally) {
-					onFinally();
+					await onFinally();
 				}
 				showLoader && dispatch(setLoading({ isLoading: false }));
 			}
@@ -92,25 +120,24 @@ export default useDismissAlarm;
 
 ## Query wrapper
 
+### Hook types
+
 ```typescript
-import { useEffect } from 'react';
 import {
 	BaseQueryFn,
 	QueryDefinition,
 	QueryArgFrom,
 } from '@reduxjs/toolkit/query';
 import { UseQuery } from '@reduxjs/toolkit/dist/query/react/buildHooks';
-import { useSetLoading } from 'src/redux/features/application/loading';
 import { RequestError } from '../types';
 
-interface UseQueryHandlerOptions<ResponseType> {
-	onSuccess?: (response: ResponseType) => void;
-	onError?: (error: RequestError) => void;
-	onFinally?: () => void;
+export interface UseQueryHandlerOptions<ResponseType> {
+	onSuccess?: (response: ResponseType) => Promise<void> | void;
+	onError?: (error: RequestError) => Promise<void> | void;
 	showLoader?: boolean;
 }
 
-interface UseQueryHandlerParams<
+export interface UseQueryHandlerParams<
 	U,
 	V extends BaseQueryFn,
 	W,
@@ -121,6 +148,15 @@ interface UseQueryHandlerParams<
 	queryArgs: QueryArgFrom<QueryDefinition<U, V, X, W>>;
 	extraOptions?: QueryDefinition<U, V, X, W>['extraOptions'];
 }
+```
+
+### Hook
+
+```typescript
+import { useEffect } from 'react';
+import { BaseQueryFn } from '@reduxjs/toolkit/query';
+import { useSetLoading } from 'src/redux/features/application/loading';
+import { UseQueryHandlerParams } from './useMutationHandlerTypes';
 
 const useQueryHandler = <
 	U,
@@ -130,10 +166,10 @@ const useQueryHandler = <
 >({
 	query,
 	options,
-	queryArgs = {} as QueryArgFrom<QueryDefinition<U, V, X, W>>,
+	queryArgs = {} as UseQueryHandlerParams<U, V, W, X>['queryArgs'],
 	extraOptions,
 }: UseQueryHandlerParams<U, V, W, X>) => {
-	const { onSuccess, onError, onFinally, showLoader = true } = options;
+	const { onSuccess, onError, showLoader = true } = options;
 
 	const {
 		isSuccess,
@@ -145,36 +181,26 @@ const useQueryHandler = <
 		...queryResult
 	} = query(queryArgs, extraOptions);
 
-	useSetLoading(showLoader && (isFetching || isLoading)); // Spinner component handled by Redux, check -> https://medium.com/@santitabbach/streamlining-loading-state-management-with-redux-in-react-applications-d75765f9b224
+	useSetLoading(showLoader && (isFetching || isLoading));
 
 	useEffect(() => {
-		if (isSuccess) {
-			// Perform your success enchantments here 🪄
-			if (onSuccess) {
-				onSuccess(data);
+		const handleRequest = async () => {
+			if (isSuccess) {
+				// Perform your success enchantments here 🪄
+				if (onSuccess) {
+					await onSuccess(data);
+				}
 			}
-		}
-		if (isError) {
-			// Perform your error enchantments here 🪄
-			if (onError) {
-				onError(error);
+			if (isError) {
+				// Perform your error enchantments here 🪄
+				if (onError) {
+					await onError(error);
+				}
 			}
-		}
+		};
 
-		if (!isLoading && onFinally) {
-			// Perform your final enchantments here 🪄
-			onFinally();
-		}
-	}, [
-		data,
-		error,
-		isError,
-		isLoading,
-		isSuccess,
-		onError,
-		onFinally,
-		onSuccess,
-	]);
+		void handleRequest();
+	}, [data, error, isError, isLoading, isSuccess, onError, onSuccess]);
 
 	return {
 		isSuccess,
