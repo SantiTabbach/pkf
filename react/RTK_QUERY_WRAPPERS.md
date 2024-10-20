@@ -46,6 +46,16 @@ import {
 	UseMutationHandlerOptions,
 } from './useMutationHandler.d.ts';
 
+/**
+ * Hook that wraps a mutation and handles its loading, success, and error states.
+ * @template U The type of the mutation argument.
+ * @template V The type of the base query function.
+ * @template W The type of the mutation response.
+ * @template X The key of the mutation, optional.
+ * @param mutation The mutation to be executed.
+ * @param options Options including callbacks for handling success, error, and finalization.
+ * @returns The mutation state and the function to execute the mutation.
+ */
 const useMutationHandler = <
 	U,
 	V extends BaseQueryFn,
@@ -60,6 +70,10 @@ const useMutationHandler = <
 	const [mutate, status] = mutation();
 	const dispatch = useDispatch();
 
+	/**
+	 * Function that executes the mutation and manages the loading state, errors, and finalization.
+	 * @param requestData Data required to execute the mutation.
+	 */
 	const wrappedMutation = useCallback(
 		async (requestData: QueryArg<U, V, X, W>) => {
 			showLoader && dispatch(setLoading({ isLoading: true })); // Spinner component handled by Redux, check -> https://medium.com/@santitabbach/streamlining-loading-state-management-with-redux-in-react-applications-d75765f9b224
@@ -158,6 +172,15 @@ import { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { useSetLoading } from 'src/redux/features/application/loading';
 import { UseQueryHandlerParams } from './useQueryHandler.d.ts';
 
+/**
+ * Hook that wraps a query and handles its loading, success, and error states.
+ * @template U The type of the query argument.
+ * @template V The type of the base query function.
+ * @template W The type of the query response.
+ * @template X The key of the query, optional.
+ * @param query Parameters needed to execute and manage the query.
+ * @returns The query state and the fetched data.
+ */
 const useQueryHandler = <
 	U,
 	V extends BaseQueryFn,
