@@ -156,7 +156,7 @@ export interface UseQueryHandlerParams<
 import { useEffect } from 'react';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { useSetLoading } from 'src/redux/features/application/loading';
-import { UseQueryHandlerParams } from './useMutationHandlerTypes';
+import { UseQueryHandlerParams } from './useQueryHandler.d.ts';
 
 const useQueryHandler = <
 	U,
