@@ -29,4 +29,4 @@
 
 ### React Native
 
-- [Connect BLE devices with BLE PLX](./react-native/CONNECT_BLE_DEVICES.md)
+- [Guide: Connecting BLE Devices to Your React Native Application - Keep the App BLE-Agnostic](./react-native/CONNECT_BLE_DEVICES.md)
