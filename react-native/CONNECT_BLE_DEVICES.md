@@ -21,10 +21,10 @@ At a high level, the process looks like this:
 6. **Work with the stored device**
 
 Here’s a diagram of the process flow:
-![Steps](./connect-ble-devices/model-1.png)
+![Steps](../assets/connect-ble-devices/model-1.png)
 
 For simplicity, we will not diagram the error scenarios:
-![flow](./connect-ble-devices/model-2.png)
+![flow](../assets/connect-ble-devices/model-2.png)
 
 ---
 
@@ -485,7 +485,7 @@ And that's it! The device is now connected and ready for the application to inte
 
 This is what a complete example looks like:
 
-![Blood pressure demo](./connect-ble-devices/blood-pressure-demo.gif)
+![Blood pressure demo](../assets/connect-ble-devices/blood-pressure-demo.gif)
 
 You can find the full code here -> https://github.com/SantiTabbach/ble-plx-example.
 
