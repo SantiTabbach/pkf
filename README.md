@@ -8,10 +8,10 @@
 
 ## Pill jars
 
-### Deploy
+### Infrastructure
 
-- [Hosting a Web Application on a Local Nginx Server: A Step-by-Step Guide](./deployment/HOSTING_A_WEB_APP.md)
-- [SSH Connection with an Alias](./deployment/SSH_WITH_ALIAS.md)
+- [Hosting a Web Application on a Local Nginx Server: A Step-by-Step Guide](./infrastructure/HOSTING_A_WEB_APP.md)
+- [SSH Connection with an Alias](./infrastructure/SSH_WITH_ALIAS.md)
 
 ### Docker
 
