@@ -13,7 +13,7 @@
 
 - [Set docker credentials source](./docker/CHANGE_CREDENTIALS.md)
 
-### Typescript utilities
+### utilities
 
 - [LocalStorage utility](./utilities/LOCAL_STORAGE_UTILITY.md)
 
