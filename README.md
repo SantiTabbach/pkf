@@ -1,7 +1,10 @@
 # Pills of knowledge for the future
 
-![pill-time](./assets/pill-time.gif)
-
+<p align="center">
+  <img src="./assets/pills-1.gif" alt="pills" width="200" style="max-width: 200px; height: auto;"/>
+   <img src="./assets/pills-2.gif" alt="pills" width="200" style="max-width: 200px; height: auto;"/>
+    <img src="./assets/pills-1.gif" alt="pills" width="200" style="max-width: 200px; height: auto;"/>
+</p>
 ## Pill jars
 
 ### Deploy
