@@ -13,6 +13,18 @@ import {
 } from '@reduxjs/toolkit/dist/query/react/buildHooks';
 import { MaybePromise } from '@reduxjs/toolkit/dist/query/tsHelpers';
 
+/**
+ * BaseOptions: Define optional callbacks for handling
+ * success, error, and loading states for both mutations and queries.
+ *
+ * @template ResponseType - The expected type of the API response.
+ * @template S - The type of the error state.
+ * @template T - The type of the success state.
+ *
+ * @property {function} [onSuccess] - A callback executed on a successful response.
+ * @property {function} [onError] - A callback executed on an error.
+ * @property {boolean} [showLoader] - Whether to display a loading spinner (default: true).
+ */
 interface BaseOptions<ResponseType, S, T> {
 	onSuccess?: (response: ResponseType) => MaybePromise<T>;
 	onError?: (error: unknown) => MaybePromise<S>;
@@ -20,6 +32,15 @@ interface BaseOptions<ResponseType, S, T> {
 }
 
 // Mutation handler types
+
+/**
+ * MutationArgs: Defines the arguments for mutation functions.
+ *
+ * @template U - The mutation argument type.
+ * @template V - BaseQueryFn from Redux Toolkit for managing base queries.
+ * @template X - The cache key type for the mutation.
+ * @template W - The response type for the mutation.
+ */
 export type MutationArgs<
 	U,
 	V extends BaseQueryFn,
@@ -27,6 +48,20 @@ export type MutationArgs<
 	W
 > = QueryArgFrom<MutationDefinition<U, V, X, W>>;
 
+/**
+ * UseMutationHandlerParams: Defines the parameters for the mutation handler hook.
+ *
+ * @template R - Type of the 'finally' callback return.
+ * @template S - Type of the 'onError' callback return.
+ * @template T - Type of the 'onSuccess' callback return.
+ * @template U - The mutation argument type.
+ * @template V - BaseQueryFn from Redux Toolkit for managing base queries.
+ * @template W - The response type for the mutation.
+ * @template X - The cache key type for the mutation.
+ *
+ * @property {UseMutation} mutation - The mutation hook from Redux Toolkit.
+ * @property {object} [options] - Optional callbacks for success, error, and finally.
+ */
 export interface UseMutationHandlerParams<
 	R,
 	S,
@@ -43,6 +78,15 @@ export interface UseMutationHandlerParams<
 }
 
 // Query handler types
+
+/**
+ * QueryArgs: Defines the arguments for query functions.
+ *
+ * @template U - The query argument type.
+ * @template V - BaseQueryFn from Redux Toolkit for managing base queries.
+ * @template W - The response type for the query.
+ * @template X - The cache key type for the query.
+ */
 export type QueryArgs<
 	U,
 	V extends BaseQueryFn,
@@ -50,6 +94,20 @@ export type QueryArgs<
 	X extends string = string
 > = QueryArgFrom<QueryDefinition<U, V, X, W>>;
 
+/**
+ * UseQueryHandlerParams: Defines the parameters for the query handler hook.
+ *
+ * @template S - Type of the 'onError' callback return.
+ * @template T - Type of the 'onSuccess' callback return.
+ * @template U - The query argument type.
+ * @template V - BaseQueryFn from Redux Toolkit for managing base queries.
+ * @template W - The response type for the query.
+ * @template X - The cache key type for the query.
+ *
+ * @property {UseQuery} query - The query hook from Redux Toolkit.
+ * @property {object} [options] - Optional callbacks for success, error.
+ * @property {object} [extraOptions] - Extra options for query.
+ */
 export interface UseQueryHandlerParams<
 	S,
 	T,
@@ -73,6 +131,22 @@ import { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { useSetLoading } from 'src/redux/features/application/loading';
 import { MutationArgs, UseMutationHandlerParams } from './types';
 
+/**
+ * useMutationHandler: A hook that wraps the RTK Query mutation hook to handle loading,
+ * success, error, and finally callbacks in a unified and extensible way.
+ *
+ * @template R - The return type for the 'finally' callback.
+ * @template S - The return type for the 'onError' callback.
+ * @template T - The return type for the 'onSuccess' callback.
+ * @template U - The mutation argument type.
+ * @template V - BaseQueryFn from Redux Toolkit for managing base queries.
+ * @template W - The response type for the mutation.
+ * @template X - The cache key type for the mutation.
+ *
+ * @param {UseMutationHandlerParams<R, S, T, U, V, W, X>} params - Contains the mutation function and optional callbacks.
+ *
+ * @returns {object} - The wrapped mutation function along with the mutation status.
+ */
 const useMutationHandler = <
 	R,
 	S,
@@ -173,6 +247,21 @@ import { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { useSetLoading } from 'src/redux/features/application/loading';
 import { QueryArgs, UseQueryHandlerParams } from './types';
 
+/**
+ * useQueryHandler: A hook that wraps the RTK Query query hook to handle loading,
+ * success, and error callbacks in a unified and extensible way.
+ *
+ * @template S - Type for the 'onError' callback.
+ * @template T - Type for the 'onSuccess' callback.
+ * @template U - The query argument type.
+ * @template V - BaseQueryFn from Redux Toolkit for managing base queries.
+ * @template W - The response type for the query.
+ * @template X - The cache key type for the query.
+ *
+ * @param {UseQueryHandlerParams<S, T, U, V, W, X>} params - Contains the query function and optional callbacks.
+ *
+ * @returns {object} - The query result, including success and error status, data, and more.
+ */
 const useQueryHandler = <
 	S,
 	T,
