@@ -1,22 +1,32 @@
-## Mutation wrapper
-
-### Hook types
+## Wrapper types
 
 ```typescript
 import {
 	BaseQueryFn,
 	MutationDefinition,
 	QueryArgFrom,
+	QueryDefinition,
 } from '@reduxjs/toolkit/query';
-import { UseMutation } from '@reduxjs/toolkit/dist/query/react/buildHooks';
-import { RequestError } from 'src/services/types';
+import {
+	UseMutation,
+	UseQuery,
+} from '@reduxjs/toolkit/dist/query/react/buildHooks';
+import { MaybePromise } from '@reduxjs/toolkit/dist/query/tsHelpers';
 
-export interface UseMutationHandlerOptions<ResponseType> {
-	onSuccess?: (response: ResponseType) => Promise<void> | void;
-	onError?: (error: RequestError) => Promise<void> | void;
-	onFinally?: (args?: unknown) => Promise<void> | void;
+interface BaseOptions<ResponseType, T, K> {
+	onSuccess?: (response: ResponseType) => MaybePromise<T>;
+	onError?: (error: unknown) => MaybePromise<K>;
 	showLoader?: boolean;
 }
+
+// Mutation handler types
+export type UseMutationHandlerOptions<ResponseType, S, T, K> = BaseOptions<
+	ResponseType,
+	S,
+	T
+> & {
+	onFinally?: (args?: unknown) => MaybePromise<K>;
+};
 
 export type MutationHandler<
 	U,
@@ -31,49 +41,61 @@ export type QueryArg<
 	X extends string,
 	W
 > = QueryArgFrom<MutationDefinition<U, V, X, W>>;
+
+// Query handler types
+export type UseQueryHandlerOptions<ResponseType, T, K> = BaseOptions<
+	ResponseType,
+	T,
+	K
+>;
+
+export type QueryArgs<
+	U,
+	V extends BaseQueryFn,
+	W,
+	X extends string = string
+> = QueryArgFrom<QueryDefinition<U, V, X, W>>;
+export interface UseQueryHandlerParams<
+	T,
+	K,
+	U,
+	V extends BaseQueryFn,
+	W,
+	X extends string = string
+> {
+	query: UseQuery<QueryDefinition<U, V, X, W>>;
+	options: UseQueryHandlerOptions<W, T, K>;
+	queryArgs?: QueryArgs<U, V, W, X>;
+	extraOptions?: QueryDefinition<U, V, X, W>['extraOptions'];
+}
 ```
 
-### Hook
+## Mutation wrapper
 
 ```typescript
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
+import { useDispatch } from 'react-redux';
 import { setLoading } from 'src/redux/features/application/loading';
-import {
-	MutationHandler,
-	QueryArg,
-	UseMutationHandlerOptions,
-} from './useMutationHandler.d.ts';
+import { MutationHandler, QueryArg, UseMutationHandlerOptions } from './types';
 
-/**
- * Hook that wraps a mutation and handles its loading, success, and error states.
- * @template U The type of the mutation argument.
- * @template V The type of the base query function.
- * @template W The type of the mutation response.
- * @template X The key of the mutation, optional.
- * @param mutation The mutation to be executed.
- * @param options Options including callbacks for handling success, error, and finalization.
- * @returns The mutation state and the function to execute the mutation.
- */
 const useMutationHandler = <
+	S,
+	T,
+	K,
 	U,
 	V extends BaseQueryFn,
 	W,
 	X extends string = string
 >(
 	mutation: MutationHandler<U, V, W, X>,
-	options: UseMutationHandlerOptions<W>
+	options: UseMutationHandlerOptions<W, S, T, K>
 ) => {
 	const { onSuccess, onError, onFinally, showLoader = true } = options;
 
 	const [mutate, status] = mutation();
 	const dispatch = useDispatch();
 
-	/**
-	 * Function that executes the mutation and manages the loading state, errors, and finalization.
-	 * @param requestData Data required to execute the mutation.
-	 */
 	const wrappedMutation = useCallback(
 		async (requestData: QueryArg<U, V, X, W>) => {
 			showLoader && dispatch(setLoading({ isLoading: true })); // Spinner component handled by Redux, check -> https://medium.com/@santitabbach/streamlining-loading-state-management-with-redux-in-react-applications-d75765f9b224
@@ -134,54 +156,15 @@ export default useDismissAlarm;
 
 ## Query wrapper
 
-### Hook types
-
-```typescript
-import {
-	BaseQueryFn,
-	QueryDefinition,
-	QueryArgFrom,
-} from '@reduxjs/toolkit/query';
-import { UseQuery } from '@reduxjs/toolkit/dist/query/react/buildHooks';
-import { RequestError } from '../types';
-
-export interface UseQueryHandlerOptions<ResponseType> {
-	onSuccess?: (response: ResponseType) => Promise<void> | void;
-	onError?: (error: RequestError) => Promise<void> | void;
-	showLoader?: boolean;
-}
-
-export interface UseQueryHandlerParams<
-	U,
-	V extends BaseQueryFn,
-	W,
-	X extends string = string
-> {
-	query: UseQuery<QueryDefinition<U, V, X, W>>;
-	options: UseQueryHandlerOptions<W>;
-	queryArgs: QueryArgFrom<QueryDefinition<U, V, X, W>>;
-	extraOptions?: QueryDefinition<U, V, X, W>['extraOptions'];
-}
-```
-
-### Hook
-
 ```typescript
 import { useEffect } from 'react';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { useSetLoading } from 'src/redux/features/application/loading';
-import { UseQueryHandlerParams } from './useQueryHandler.d.ts';
+import { QueryArgs, UseQueryHandlerParams } from '../types';
 
-/**
- * Hook that wraps a query and handles its loading, success, and error states.
- * @template U The type of the query argument.
- * @template V The type of the base query function.
- * @template W The type of the query response.
- * @template X The key of the query, optional.
- * @param query Parameters needed to execute and manage the query.
- * @returns The query state and the fetched data.
- */
 const useQueryHandler = <
+	T,
+	K,
 	U,
 	V extends BaseQueryFn,
 	W,
@@ -189,9 +172,9 @@ const useQueryHandler = <
 >({
 	query,
 	options,
-	queryArgs = {} as UseQueryHandlerParams<U, V, W, X>['queryArgs'],
+	queryArgs = {} as QueryArgs<U, V, W, X>,
 	extraOptions,
-}: UseQueryHandlerParams<U, V, W, X>) => {
+}: UseQueryHandlerParams<T, K, U, V, W, X>) => {
 	const { onSuccess, onError, showLoader = true } = options;
 
 	const {
@@ -214,16 +197,18 @@ const useQueryHandler = <
 					await onSuccess(data);
 				}
 			}
-			if (isError) {
-				// Perform your error enchantments here 🪄
+			if (isError && onError) {
 				if (onError) {
-					await onError(error);
+					// Perform your error enchantments here 🪄
+					if (onError) {
+						await onError(error);
+					}
 				}
 			}
 		};
 
 		void handleRequest();
-	}, [data, error, isError, isLoading, isSuccess, onError, onSuccess]);
+	}, [data, error, isError, isSuccess, onError, onSuccess]);
 
 	return {
 		isSuccess,
