@@ -145,7 +145,6 @@ import { MutationArgs, UseMutationHandlerParams } from './types';
  *
  * @param {UseMutationHandlerParams<R, S, T, U, V, W, X>} params - Contains the mutation function and optional callbacks.
  *
- * @returns {object} - The wrapped mutation function along with the mutation status.
  */
 const useMutationHandler = <
 	R,
@@ -260,7 +259,6 @@ import { QueryArgs, UseQueryHandlerParams } from './types';
  *
  * @param {UseQueryHandlerParams<S, T, U, V, W, X>} params - Contains the query function and optional callbacks.
  *
- * @returns {object} - The query result, including success and error status, data, and more.
  */
 const useQueryHandler = <
 	S,
