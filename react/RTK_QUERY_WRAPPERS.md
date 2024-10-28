@@ -13,58 +13,53 @@ import {
 } from '@reduxjs/toolkit/dist/query/react/buildHooks';
 import { MaybePromise } from '@reduxjs/toolkit/dist/query/tsHelpers';
 
-interface BaseOptions<ResponseType, T, K> {
+interface BaseOptions<ResponseType, S, T> {
 	onSuccess?: (response: ResponseType) => MaybePromise<T>;
-	onError?: (error: unknown) => MaybePromise<K>;
+	onError?: (error: unknown) => MaybePromise<S>;
 	showLoader?: boolean;
 }
 
 // Mutation handler types
-export type UseMutationHandlerOptions<ResponseType, S, T, K> = BaseOptions<
-	ResponseType,
-	S,
-	T
-> & {
-	onFinally?: (args?: unknown) => MaybePromise<K>;
-};
-
-export type MutationHandler<
-	U,
-	V extends BaseQueryFn,
-	W,
-	X extends string = string
-> = UseMutation<MutationDefinition<U, V, X, W>>;
-
-export type QueryArg<
+export type MutationArgs<
 	U,
 	V extends BaseQueryFn,
 	X extends string,
 	W
 > = QueryArgFrom<MutationDefinition<U, V, X, W>>;
 
-// Query handler types
-export type UseQueryHandlerOptions<ResponseType, T, K> = BaseOptions<
-	ResponseType,
+export interface UseMutationHandlerParams<
+	R,
+	S,
 	T,
-	K
->;
+	U,
+	V extends BaseQueryFn,
+	W,
+	X extends string = string
+> {
+	mutation: UseMutation<MutationDefinition<U, V, X, W>>;
+	options?: BaseOptions<W, S, T> & {
+		onFinally?: (args?: unknown) => MaybePromise<R>;
+	};
+}
 
+// Query handler types
 export type QueryArgs<
 	U,
 	V extends BaseQueryFn,
 	W,
 	X extends string = string
 > = QueryArgFrom<QueryDefinition<U, V, X, W>>;
+
 export interface UseQueryHandlerParams<
+	S,
 	T,
-	K,
 	U,
 	V extends BaseQueryFn,
 	W,
 	X extends string = string
 > {
 	query: UseQuery<QueryDefinition<U, V, X, W>>;
-	options: UseQueryHandlerOptions<W, T, K>;
+	options?: BaseOptions<W, S, T>;
 	queryArgs?: QueryArgs<U, V, W, X>;
 	extraOptions?: QueryDefinition<U, V, X, W>['extraOptions'];
 }
@@ -75,32 +70,32 @@ export interface UseQueryHandlerParams<
 ```typescript
 import { useCallback } from 'react';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
-import { useDispatch } from 'react-redux';
-import { setLoading } from 'src/redux/features/application/loading';
-import { MutationHandler, QueryArg, UseMutationHandlerOptions } from './types';
+import { useSetLoading } from 'src/redux/features/application/loading';
+import { MutationArgs, UseMutationHandlerParams } from './types';
 
 const useMutationHandler = <
+	R,
 	S,
 	T,
-	K,
 	U,
 	V extends BaseQueryFn,
 	W,
 	X extends string = string
->(
-	mutation: MutationHandler<U, V, W, X>,
-	options: UseMutationHandlerOptions<W, S, T, K>
-) => {
+>({
+	mutation,
+	options = {},
+}: UseMutationHandlerParams<R, S, T, U, V, W, X>) => {
 	const { onSuccess, onError, onFinally, showLoader = true } = options;
 
 	const [mutate, status] = mutation();
-	const dispatch = useDispatch();
+
+	useSetLoading(showLoader && status.isLoading); // Spinner component handled by Redux, check -> https://medium.com/@santitabbach/streamlining-loading-state-management-with-redux-in-react-applications-d75765f9b224
 
 	const wrappedMutation = useCallback(
-		async (requestData: QueryArg<U, V, X, W>) => {
-			showLoader && dispatch(setLoading({ isLoading: true })); // Spinner component handled by Redux, check -> https://medium.com/@santitabbach/streamlining-loading-state-management-with-redux-in-react-applications-d75765f9b224
+		async (requestData: MutationArgs<U, V, X, W>) => {
 			try {
 				const response = await mutate(requestData).unwrap();
+
 				// Perform your success enchantments here 🪄
 				if (onSuccess) {
 					return await onSuccess(response);
@@ -117,10 +112,9 @@ const useMutationHandler = <
 				if (onFinally) {
 					await onFinally();
 				}
-				showLoader && dispatch(setLoading({ isLoading: false }));
 			}
 		},
-		[showLoader, dispatch, mutate, onSuccess, onError, onFinally]
+		[mutate, onSuccess, onError, onFinally]
 	);
 
 	return { wrappedMutation, ...status };
@@ -137,21 +131,38 @@ import { useDismissAlarmMutation } from 'src/redux/features/alertifyCoreApi/alar
 import { TOAST_MESSAGES, Toast } from 'src/application/components';
 
 const useDismissAlarm = () => {
-	const { wrappedMutation: dismissAlarm } = useMutationHandler(
-		useDismissAlarmMutation,
-		{
+	const { wrappedMutation: dismissAlarm } = useMutationHandler({
+		mutation: useDismissAlarmMutation,
+		options: {
+			showLoader: false,
 			onSuccess: () => {
 				Toast.show({
 					description: TOAST_MESSAGES.CLOSED_ALARM,
 				});
 			},
-		}
-	);
+		},
+	});
 
-	return { dismissAlarmFunction: dismissAlarm };
+	return dismissAlarm;
 };
 
 export default useDismissAlarm;
+
+const CloseAlarmModal = ({ isVisible, setIsVisible, alarmId }: Props) => {
+    const [description, setDescription] = useState(EMPTY_STRING);
+
+    const dismissAlarm = useDismissAlarm();
+
+    const handleSubmit = async () => {
+      setIsVisible(false);
+
+	  await dismissAlarm({ id: alarmId, description });
+    };
+
+    return (...)
+  };
+
+  export default CloseAlarmModal;
 ```
 
 ## Query wrapper
@@ -160,21 +171,21 @@ export default useDismissAlarm;
 import { useEffect } from 'react';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { useSetLoading } from 'src/redux/features/application/loading';
-import { QueryArgs, UseQueryHandlerParams } from '../types';
+import { QueryArgs, UseQueryHandlerParams } from './types';
 
 const useQueryHandler = <
+	S,
 	T,
-	K,
 	U,
 	V extends BaseQueryFn,
 	W,
 	X extends string = string
 >({
 	query,
-	options,
+	options = {},
 	queryArgs = {} as QueryArgs<U, V, W, X>,
 	extraOptions,
-}: UseQueryHandlerParams<T, K, U, V, W, X>) => {
+}: UseQueryHandlerParams<S, T, U, V, W, X>) => {
 	const { onSuccess, onError, showLoader = true } = options;
 
 	const {
@@ -245,4 +256,15 @@ const useGetActiveNeighborhoods = () => {
 };
 
 export default useGetActiveNeighborhoods;
+
+const MapComponent = () => {
+  const { colorMode } = useColorMode();
+
+  const { activeNeighborhoods } = useGetActiveNeighborhoods();
+
+  return (...);
+};
+
+export default MapComponent;
+
 ```
