@@ -200,42 +200,38 @@ export default useMutationHandler;
 
 ```typescript
 import { useMutationHandler } from 'src/services';
-import { useDismissAlarmMutation } from 'src/redux/features/alertifyCoreApi/alarms';
+import { useCreateUserMutation } from 'src/redux/features/users/apiUsers';
 import { TOAST_MESSAGES, Toast } from 'src/application/components';
 
-const useDismissAlarm = () => {
-	const { wrappedMutation: dismissAlarm } = useMutationHandler({
-		mutation: useDismissAlarmMutation,
+const useCreateUser = () => {
+	const { wrappedMutation: createUser } = useMutationHandler({
+		mutation: useCreateUserMutation,
 		options: {
 			showLoader: false,
 			onSuccess: () => {
 				Toast.show({
-					description: TOAST_MESSAGES.CLOSED_ALARM,
+					description: TOAST_MESSAGES.CREATE_USER,
 				});
 			},
 		},
 	});
 
-	return dismissAlarm;
+	return createUser;
 };
 
-export default useDismissAlarm;
+export default useCreateUser;
 
-const CloseAlarmModal = ({ isVisible, setIsVisible, alarmId }: Props) => {
-    const [description, setDescription] = useState(EMPTY_STRING);
-
-    const dismissAlarm = useDismissAlarm();
+const UserForm = ({ userPayload }: { userPayload: UserPayload }) => {
+    const createUser = useCreateUser();
 
     const handleSubmit = async () => {
-      setIsVisible(false);
-
-	  await dismissAlarm({ id: alarmId, description });
+	  await createUser(userPayload);
     };
 
-    return (...)
+    return <Form onSubmit={handleSubmit} ... />
   };
 
-  export default CloseAlarmModal;
+  export default UserForm;
 ```
 
 ## Query wrapper
@@ -325,12 +321,12 @@ export default useQueryHandler;
 ### Example of use
 
 ```typescript
-import { useGetActiveNeighborhoodsQuery } from 'src/redux/features/alertifyCoreApi/map/apiMapSlice';
+import { useGetUsersQuery } from 'src/redux/features/users/apiUsers';
 import { useQueryHandler } from 'src/services';
 
-const useGetActiveNeighborhoods = () => {
-	const { data: activeNeighborhoods = [] } = useQueryHandler({
-		query: useGetActiveNeighborhoodsQuery,
+const useGetUsers = () => {
+	const { data: users = [] } = useQueryHandler({
+		query: useGetUsersQuery,
 		options: {
 			showLoader: false,
 		},
@@ -339,19 +335,17 @@ const useGetActiveNeighborhoods = () => {
 		},
 	});
 
-	return { activeNeighborhoods };
+	return users;
 };
 
-export default useGetActiveNeighborhoods;
+export default useGetUsers;
 
-const MapComponent = () => {
-  const { colorMode } = useColorMode();
+const UsersList = () => {
+  const users = useGetUsers();
 
-  const { activeNeighborhoods } = useGetActiveNeighborhoods();
-
-  return (...);
+  return users.map(...);
 };
 
-export default MapComponent;
+export default UsersList;
 
 ```
