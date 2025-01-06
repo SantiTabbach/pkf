@@ -199,6 +199,8 @@ export default useMutationHandler;
 ### Example of use
 
 ```typescript
+
+// useCreateUser.ts
 import { useMutationHandler } from 'src/services';
 import { useCreateUserMutation } from 'src/redux/features/users/apiUsers';
 import { TOAST_MESSAGES, Toast } from 'src/application/components';
@@ -221,6 +223,7 @@ const useCreateUser = () => {
 
 export default useCreateUser;
 
+// UserForm.tsx
 const UserForm = ({ userPayload }: { userPayload: UserPayload }) => {
     const createUser = useCreateUser();
 
@@ -321,11 +324,13 @@ export default useQueryHandler;
 ### Example of use
 
 ```typescript
+
+// useGetUsers.ts
 import { useGetUsersQuery } from 'src/redux/features/users/apiUsers';
 import { useQueryHandler } from 'src/services';
 
 const useGetUsers = () => {
-	const { data: users = [] } = useQueryHandler({
+	const { data: users = [], ...rest } = useQueryHandler({
 		query: useGetUsersQuery,
 		options: {
 			showLoader: false,
@@ -335,13 +340,18 @@ const useGetUsers = () => {
 		},
 	});
 
-	return users;
+	return { users, ...rest };
 };
 
 export default useGetUsers;
 
+// UsersList.tsx
 const UsersList = () => {
-  const users = useGetUsers();
+  const { users, error } = useGetUsers();
+
+  if(error) {
+	return <Error />
+  }
 
   return users.map(...);
 };
