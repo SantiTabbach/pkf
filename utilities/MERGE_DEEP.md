@@ -4,6 +4,8 @@
  * @param target The target object to get properties from.
  * @param source The source object from which to copy properties.
  * @return A new merged and deep copied object.
+ *
+ * Credits: https://flowbite.com/
  */
 export function mergeDeep<T extends object, S extends object>(
 	target: T,

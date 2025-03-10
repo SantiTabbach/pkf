@@ -5,6 +5,8 @@
  * @param <T> The type of the source object.
  * @param source The object to be deeply cloned.
  * @return A deep copy of the given object.
+ *
+ * Credits: https://flowbite.com/
  */
 public static <T> T cloneDeep(T source) {
     if (!isObject(source)) {
